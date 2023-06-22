@@ -1,0 +1,14 @@
+{
+  "runtime": "nodejs16.x",
+  "version": "1.0",
+  "appFunctions": {
+    "calculatePayments": {
+      "file": "calculatePayments.js",
+      "secrets": []
+    },
+    "createDeal": {
+      "file": "createDeal.js",
+      "secrets": ["HS_API_PRIVATE_TOKEN"]
+    }
+  }
+}
