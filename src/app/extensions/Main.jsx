@@ -7,29 +7,17 @@ import { ResultsTable } from "./components/ResultsTable";
 hubspot.extend(({ context, runServerlessFunction, actions }) => (
   <Extension
     runServerless={runServerlessFunction}
-    fetchProperties={actions.fetchCrmObjectProperties}
     sendAlert={actions.addAlert}
   />
 ));
 
 // Define the Extension component, taking in runServerless, context, & sendAlert as props
-const Extension = ({ runServerless, fetchProperties, sendAlert }) => {
+const Extension = ({ runServerless, sendAlert }) => {
   const [showResults, setShowResults] = useState(false);
   const [showForm, setShowForm] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [payments, setPayments] = useState([]);
-  const [contactProperties, setContactProperties] = useState("");
-
-  useEffect(() => {
-    fetchProperties(["hs_object_id", "firstname", "lastname"])
-      .then((properties) => {
-        setContactProperties(properties);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, [fetchProperties]);
 
   const onCalculateClick = useCallback(
     (loanParams) => {
@@ -39,7 +27,6 @@ const Extension = ({ runServerless, fetchProperties, sendAlert }) => {
       runServerless({
         name: "calculatePayments",
         parameters: loanParams,
-        propertiesToSend: ["hs_object_id", "firstname"], //not working
       })
         .then(async (result) => {
           if (result.status === "SUCCESS") {
@@ -79,9 +66,11 @@ const Extension = ({ runServerless, fetchProperties, sendAlert }) => {
       runServerless({
         name: "createDeal",
         parameters: loanParams,
+        propertiesToSend: ["hs_object_id", "firstname", "lastname"],
       })
         .then(async (result) => {
           if (result.status === "SUCCESS") {
+            console.log(result);
             sendAlert({
               message: `Deal created succesfully! ${result.response.body}`,
             });
@@ -112,7 +101,6 @@ const Extension = ({ runServerless, fetchProperties, sendAlert }) => {
           onResetClick={onResetClick}
           onCalculateClick={onCalculateClick}
           onCreateDealClick={onCreateDealClick}
-          contactProperties={contactProperties}
           enableButton={!showResults}
         />
       ) : null}

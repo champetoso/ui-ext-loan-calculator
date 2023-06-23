@@ -58,7 +58,6 @@
     onResetClick,
     onCalculateClick,
     onCreateDealClick,
-    contactProperties,
     enableButton
   }) => {
     const [loanAmount, setLoanAmount] = React2.useState("");
@@ -72,9 +71,11 @@
       { label: "Quarterly", value: 4 },
       { label: "Annually", value: 1 }
     ];
-    React2.useEffect(() => {
-      console.log("CalculatorForm UseEffect", contactProperties);
-    });
+    const loanAmountError = !loanAmount > 0;
+    const loanTermError = !loanTerm > 0;
+    const interestRateError = !interestRate > 0;
+    const payBackError = !payBack;
+    const doesNotMeetRequirements = loanAmountError || loanTermError || interestRateError;
     const handleCalculateClick = React2.useCallback(() => {
       onCalculateClick({
         loanAmount,
@@ -91,10 +92,9 @@
         loanAmount,
         loanTerm,
         interestRate,
-        payBack,
-        contactProperties
+        payBack
       });
-    }, [loanAmount, loanTerm, interestRate, payBack, contactProperties]);
+    }, [loanAmount, loanTerm, interestRate, payBack]);
     return /* @__PURE__ */ React2.createElement(Stack, { distance: "large" }, /* @__PURE__ */ React2.createElement(Form, { preventDefault: true }, /* @__PURE__ */ React2.createElement(
       NumberInput,
       {
@@ -103,7 +103,9 @@
         placeholder: "10,000",
         value: loanAmount,
         required: true,
-        onChange: (value) => setLoanAmount(value)
+        onChange: (value) => setLoanAmount(value),
+        error: loanAmountError,
+        validationMessage: loanAmountError ? "Amount cannot be empty or negative" : ""
       }
     ), /* @__PURE__ */ React2.createElement(
       NumberInput,
@@ -113,7 +115,9 @@
         placeholder: "24",
         value: loanTerm,
         required: true,
-        onChange: (value) => setLoanTerm(value)
+        onChange: (value) => setLoanTerm(value),
+        error: loanTermError,
+        validationMessage: loanTermError ? "Amount cannot be empty or negative" : ""
       }
     ), /* @__PURE__ */ React2.createElement(
       NumberInput,
@@ -124,7 +128,9 @@
         value: interestRate,
         formatStyle: "percentage",
         required: true,
-        onChange: (value) => setInterestRate(value)
+        onChange: (value) => setInterestRate(value),
+        error: interestRateError,
+        validationMessage: interestRateError ? "Amount cannot be empty or negative" : ""
       }
     ), /* @__PURE__ */ React2.createElement(
       Select,
@@ -136,9 +142,19 @@
         value: payBack,
         onChange: (value) => {
           setPayBack(value);
-        }
+        },
+        error: payBackError,
+        validationMessage: payBackError ? "Please choose Pay Back" : ""
       }
-    )), /* @__PURE__ */ React2.createElement(ButtonRow, { disableDropdown: false }, /* @__PURE__ */ React2.createElement(Button, { onClick: handleCalculateClick, variant: "primary" }, "Calculate"), /* @__PURE__ */ React2.createElement(Button, { onClick: handleResetClick, variant: "destructive" }, "Reset"), /* @__PURE__ */ React2.createElement(Button, { disabled: enableButton, onClick: handleCreateDealClick }, "Create Deal")));
+    )), /* @__PURE__ */ React2.createElement(ButtonRow, { disableDropdown: false }, /* @__PURE__ */ React2.createElement(
+      Button,
+      {
+        onClick: handleCalculateClick,
+        disabled: doesNotMeetRequirements,
+        variant: "primary"
+      },
+      "Calculate"
+    ), /* @__PURE__ */ React2.createElement(Button, { onClick: handleResetClick, variant: "destructive" }, "Reset"), /* @__PURE__ */ React2.createElement(Button, { disabled: enableButton, onClick: handleCreateDealClick }, "Create Deal")));
   };
   const ResultsTable = ({ paymentsArray }) => {
     const ITEMS_PER_PAGE = 12;
@@ -177,33 +193,22 @@
     Extension,
     {
       runServerless: runServerlessFunction,
-      fetchProperties: actions.fetchCrmObjectProperties,
       sendAlert: actions.addAlert
     }
   ));
-  const Extension = ({ runServerless, fetchProperties, sendAlert }) => {
+  const Extension = ({ runServerless, sendAlert }) => {
     const [showResults, setShowResults] = React2.useState(false);
     const [showForm, setShowForm] = React2.useState(true);
     const [loading, setLoading] = React2.useState(false);
     const [error, setError] = React2.useState(false);
     const [payments, setPayments] = React2.useState([]);
-    const [contactProperties, setContactProperties] = React2.useState("");
-    React2.useEffect(() => {
-      fetchProperties(["hs_object_id", "firstname", "lastname"]).then((properties) => {
-        setContactProperties(properties);
-      }).catch((e) => {
-        console.log(e);
-      });
-    }, [fetchProperties]);
     const onCalculateClick = React2.useCallback(
       (loanParams) => {
         setLoading(true);
         setError(false);
         runServerless({
           name: "calculatePayments",
-          parameters: loanParams,
-          propertiesToSend: ["hs_object_id", "firstname"]
-          //not working
+          parameters: loanParams
         }).then(async (result) => {
           if (result.status === "SUCCESS") {
             if (Array.isArray(result.response.body.rows)) {
@@ -236,9 +241,11 @@
         setError(false);
         runServerless({
           name: "createDeal",
-          parameters: loanParams
+          parameters: loanParams,
+          propertiesToSend: ["hs_object_id", "firstname", "lastname"]
         }).then(async (result) => {
           if (result.status === "SUCCESS") {
+            console.log(result);
             sendAlert({
               message: `Deal created succesfully! ${result.response.body}`
             });
@@ -260,7 +267,6 @@
         onResetClick,
         onCalculateClick,
         onCreateDealClick,
-        contactProperties,
         enableButton: !showResults
       }
     ) : null, loading ? /* @__PURE__ */ React2.createElement(LoadingSpinner, { label: "Loading...", layout: "centered" }) : null, showResults ? /* @__PURE__ */ React2.createElement(ResultsTable, { paymentsArray: payments }) : null);

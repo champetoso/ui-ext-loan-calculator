@@ -1,23 +1,18 @@
 const hubspot = require("@hubspot/api-client");
 
 exports.main = async (context = {}, sendResponse) => {
-  //const { hs_object_id } = context.propertiesToSend;  //not working
-  const { loanAmount, loanTerm, interestRate, payBack, contactProperties } =
-    context.parameters;
+  const { loanAmount, loanTerm, interestRate, payBack } = context.parameters;
+  const { hs_object_id, firstname, lastname } = context.propertiesToSend;
 
   try {
     const hubspotClient = new hubspot.Client({
-      accessToken: process.env.HS_API_PRIVATE_TOKEN,
+      accessToken: context.secrets.PRIVATE_APP_ACCESS_TOKEN,
     });
 
     const properties = {
       amount: loanAmount,
       closedate: "2019-12-07T16:50:06.678Z",
-      dealname:
-        "Amortized Loan - " +
-        contactProperties.firstname +
-        " " +
-        contactProperties.lastname,
+      dealname: "Amortized Loan - " + firstname + " " + lastname,
       dealstage: "presentationscheduled",
       pipeline: "default",
       loan_amount: loanAmount,
@@ -40,7 +35,7 @@ exports.main = async (context = {}, sendResponse) => {
 
     const associationApiResponse = await hubspotClient.apiRequest({
       method: "PUT",
-      path: `/crm/v4/objects/deals/${dealApiResponse.id}/associations/contacts/${contactProperties.hs_object_id}`,
+      path: `/crm/v4/objects/deals/${dealApiResponse.id}/associations/contacts/${hs_object_id}`,
       body: associationsBody,
     });
 

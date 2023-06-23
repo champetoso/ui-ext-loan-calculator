@@ -12,7 +12,6 @@ export const CalculatorForm = ({
   onResetClick,
   onCalculateClick,
   onCreateDealClick,
-  contactProperties,
   enableButton,
 }) => {
   const [loanAmount, setLoanAmount] = useState("");
@@ -28,9 +27,12 @@ export const CalculatorForm = ({
     { label: "Annually", value: 1 },
   ];
 
-  useEffect(() => {
-    console.log("CalculatorForm UseEffect", contactProperties);
-  });
+  const loanAmountError = !loanAmount > 0;
+  const loanTermError = !loanTerm > 0;
+  const interestRateError = !interestRate > 0;
+  const payBackError = !payBack;
+  const doesNotMeetRequirements =
+    loanAmountError || loanTermError || interestRateError;
 
   const handleCalculateClick = useCallback(() => {
     onCalculateClick({
@@ -51,9 +53,8 @@ export const CalculatorForm = ({
       loanTerm,
       interestRate,
       payBack,
-      contactProperties,
     });
-  }, [loanAmount, loanTerm, interestRate, payBack, contactProperties]);
+  }, [loanAmount, loanTerm, interestRate, payBack]);
 
   return (
     <Stack distance="large">
@@ -65,6 +66,10 @@ export const CalculatorForm = ({
           value={loanAmount}
           required={true}
           onChange={(value) => setLoanAmount(value)}
+          error={loanAmountError}
+          validationMessage={
+            loanAmountError ? "Amount cannot be empty or negative" : ""
+          }
         />
         <NumberInput
           label="Loan Term (months)"
@@ -73,6 +78,10 @@ export const CalculatorForm = ({
           value={loanTerm}
           required={true}
           onChange={(value) => setLoanTerm(value)}
+          error={loanTermError}
+          validationMessage={
+            loanTermError ? "Amount cannot be empty or negative" : ""
+          }
         />
         <NumberInput
           label="Interest Rate (% APY)"
@@ -82,6 +91,10 @@ export const CalculatorForm = ({
           formatStyle="percentage"
           required={true}
           onChange={(value) => setInterestRate(value)}
+          error={interestRateError}
+          validationMessage={
+            interestRateError ? "Amount cannot be empty or negative" : ""
+          }
         />
         <Select
           label="Pay Back"
@@ -92,10 +105,16 @@ export const CalculatorForm = ({
           onChange={(value) => {
             setPayBack(value);
           }}
+          error={payBackError}
+          validationMessage={payBackError ? "Please choose Pay Back" : ""}
         />
       </Form>
       <ButtonRow disableDropdown={false}>
-        <Button onClick={handleCalculateClick} variant="primary">
+        <Button
+          onClick={handleCalculateClick}
+          disabled={doesNotMeetRequirements}
+          variant="primary"
+        >
           Calculate
         </Button>
         <Button onClick={handleResetClick} variant="destructive">

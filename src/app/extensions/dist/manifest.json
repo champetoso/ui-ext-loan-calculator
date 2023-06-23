@@ -54,13 +54,13 @@
     ]
   },
   "package": {
-    "name": "example-extension",
+    "name": "calculator-example-extension",
     "version": "0.1.0",
     "lockfileVersion": 3,
     "requires": true,
     "packages": {
       "": {
-        "name": "example-extension",
+        "name": "calculator-example-extension",
         "version": "0.1.0",
         "license": "MIT",
         "dependencies": {
@@ -1938,6 +1938,6 @@
     "name": "Amortized Loan Calculator",
     "file": "Main.jsx",
     "output": "Main.js",
-    "appName": "Get started App with React"
+    "appName": "Diego P example for mini-hackathon"
   }
 }

@@ -1,7 +1,12 @@
 {
-  "name": "Get started App with React",
-  "description": "This is an example of private app that shows a custom card on the Contact record tab built with React-based frontend. This card demonstrates simple handshake with HubSpot's serverless backend.",
-  "scopes": ["crm.objects.contacts.read", "crm.objects.contacts.write"],
+  "name": "Diego P example for mini-hackathon",
+  "description": "This is an example of a custom calculator so users can calculate loans fast inside a controled environment",
+  "scopes": [
+    "crm.objects.contacts.read",
+    "crm.objects.contacts.write",
+    "crm.objects.deals.read",
+    "crm.objects.deals.write"
+  ],
   "public": false,
   "extensions": {
     "crm": {
