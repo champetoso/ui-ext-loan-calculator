@@ -72,7 +72,7 @@ const Extension = ({ runServerless, sendAlert }) => {
           if (result.status === "SUCCESS") {
             console.log(result);
             sendAlert({
-              message: `Deal created succesfully! ${result.response.body}`,
+              message: `Deal created succesfully!`,
             });
             return;
           }

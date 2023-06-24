@@ -19,6 +19,12 @@ export const CalculatorForm = ({
   const [interestRate, setInterestRate] = useState("");
   const [payBack, setPayBack] = useState("");
 
+  const [loanAmountError, setLoanAmountError] = useState(false);
+  const [loanTermError, setLoanTermError] = useState(false);
+  const [interestRateError, setInterestRateError] = useState(false);
+  const [payBackError, setPayBackError] = useState(false);
+  const [doesNotMeetRequirements, setDoesNotMeetRequirements] = useState(false);
+
   const payBackOptions = [
     { label: "Daily", value: 360 },
     { label: "Weekly", value: 52 },
@@ -27,20 +33,43 @@ export const CalculatorForm = ({
     { label: "Annually", value: 1 },
   ];
 
-  const loanAmountError = !loanAmount > 0;
-  const loanTermError = !loanTerm > 0;
-  const interestRateError = !interestRate > 0;
-  const payBackError = !payBack;
-  const doesNotMeetRequirements =
-    loanAmountError || loanTermError || interestRateError;
+  const validateInputs = () => {
+    if (loanAmount <= 0) {
+      setLoanAmountError(true);
+    }
+    if (loanTerm <= 0) {
+      setLoanTermError(true);
+    }
+    if (interestRate <= 0) {
+      setInterestRateError(true);
+    }
+    if (!payBack) {
+      setPayBackError(true);
+    }
+  };
+
+  const resetInputErrors = () => {
+    setLoanAmountError(false);
+    setLoanTermError(false);
+    setInterestRateError(false);
+    setPayBackError(false);
+  };
 
   const handleCalculateClick = useCallback(() => {
+    resetInputErrors();
+    validateInputs();
+    setDoesNotMeetRequirements(
+      loanAmountError || loanTermError || interestRateError
+    );
+
+    //if (!doesNotMeetRequirements) { // Not Working
     onCalculateClick({
       loanAmount: loanAmount,
       loanTerm,
       interestRate,
       payBack,
     });
+    //}
   }, [loanAmount, loanTerm, interestRate, payBack]);
 
   const handleResetClick = useCallback(() => {
@@ -57,7 +86,7 @@ export const CalculatorForm = ({
   }, [loanAmount, loanTerm, interestRate, payBack]);
 
   return (
-    <Stack distance="large">
+    <Stack distance="large" align="stretch">
       <Form preventDefault={true}>
         <NumberInput
           label="Loan Amount"
@@ -84,6 +113,7 @@ export const CalculatorForm = ({
           }
         />
         <NumberInput
+          align="stretch"
           label="Interest Rate (% APY)"
           name="portalsNumber"
           placeholder="9.5"
@@ -110,11 +140,7 @@ export const CalculatorForm = ({
         />
       </Form>
       <ButtonRow disableDropdown={false}>
-        <Button
-          onClick={handleCalculateClick}
-          disabled={doesNotMeetRequirements}
-          variant="primary"
-        >
+        <Button onClick={handleCalculateClick} variant="primary">
           Calculate
         </Button>
         <Button onClick={handleResetClick} variant="destructive">

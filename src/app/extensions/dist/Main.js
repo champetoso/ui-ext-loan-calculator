@@ -64,6 +64,11 @@
     const [loanTerm, setLoanTerm] = React2.useState("");
     const [interestRate, setInterestRate] = React2.useState("");
     const [payBack, setPayBack] = React2.useState("");
+    const [loanAmountError, setLoanAmountError] = React2.useState(false);
+    const [loanTermError, setLoanTermError] = React2.useState(false);
+    const [interestRateError, setInterestRateError] = React2.useState(false);
+    const [payBackError, setPayBackError] = React2.useState(false);
+    const [doesNotMeetRequirements, setDoesNotMeetRequirements] = React2.useState(false);
     const payBackOptions = [
       { label: "Daily", value: 360 },
       { label: "Weekly", value: 52 },
@@ -71,12 +76,32 @@
       { label: "Quarterly", value: 4 },
       { label: "Annually", value: 1 }
     ];
-    const loanAmountError = !loanAmount > 0;
-    const loanTermError = !loanTerm > 0;
-    const interestRateError = !interestRate > 0;
-    const payBackError = !payBack;
-    const doesNotMeetRequirements = loanAmountError || loanTermError || interestRateError;
+    const validateInputs = () => {
+      if (loanAmount <= 0) {
+        setLoanAmountError(true);
+      }
+      if (loanTerm <= 0) {
+        setLoanTermError(true);
+      }
+      if (interestRate <= 0) {
+        setInterestRateError(true);
+      }
+      if (!payBack) {
+        setPayBackError(true);
+      }
+    };
+    const resetInputErrors = () => {
+      setLoanAmountError(false);
+      setLoanTermError(false);
+      setInterestRateError(false);
+      setPayBackError(false);
+    };
     const handleCalculateClick = React2.useCallback(() => {
+      resetInputErrors();
+      validateInputs();
+      setDoesNotMeetRequirements(
+        loanAmountError || loanTermError || interestRateError
+      );
       onCalculateClick({
         loanAmount,
         loanTerm,
@@ -95,7 +120,7 @@
         payBack
       });
     }, [loanAmount, loanTerm, interestRate, payBack]);
-    return /* @__PURE__ */ React2.createElement(Stack, { distance: "large" }, /* @__PURE__ */ React2.createElement(Form, { preventDefault: true }, /* @__PURE__ */ React2.createElement(
+    return /* @__PURE__ */ React2.createElement(Stack, { distance: "large", align: "stretch" }, /* @__PURE__ */ React2.createElement(Form, { preventDefault: true }, /* @__PURE__ */ React2.createElement(
       NumberInput,
       {
         label: "Loan Amount",
@@ -122,6 +147,7 @@
     ), /* @__PURE__ */ React2.createElement(
       NumberInput,
       {
+        align: "stretch",
         label: "Interest Rate (% APY)",
         name: "portalsNumber",
         placeholder: "9.5",
@@ -146,15 +172,7 @@
         error: payBackError,
         validationMessage: payBackError ? "Please choose Pay Back" : ""
       }
-    )), /* @__PURE__ */ React2.createElement(ButtonRow, { disableDropdown: false }, /* @__PURE__ */ React2.createElement(
-      Button,
-      {
-        onClick: handleCalculateClick,
-        disabled: doesNotMeetRequirements,
-        variant: "primary"
-      },
-      "Calculate"
-    ), /* @__PURE__ */ React2.createElement(Button, { onClick: handleResetClick, variant: "destructive" }, "Reset"), /* @__PURE__ */ React2.createElement(Button, { disabled: enableButton, onClick: handleCreateDealClick }, "Create Deal")));
+    )), /* @__PURE__ */ React2.createElement(ButtonRow, { disableDropdown: false }, /* @__PURE__ */ React2.createElement(Button, { onClick: handleCalculateClick, variant: "primary" }, "Calculate"), /* @__PURE__ */ React2.createElement(Button, { onClick: handleResetClick, variant: "destructive" }, "Reset"), /* @__PURE__ */ React2.createElement(Button, { disabled: enableButton, onClick: handleCreateDealClick }, "Create Deal")));
   };
   const ResultsTable = ({ paymentsArray }) => {
     const ITEMS_PER_PAGE = 12;
@@ -247,7 +265,7 @@
           if (result.status === "SUCCESS") {
             console.log(result);
             sendAlert({
-              message: `Deal created succesfully! ${result.response.body}`
+              message: `Deal created succesfully!`
             });
             return;
           }
